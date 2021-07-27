@@ -21,7 +21,7 @@ NAME=oss-cad-suite
 # -- If you want to genete an updated oss-cad-suite apio packages
 # -- set the new date
 YEAR=2021
-MONTH=06
+MONTH=07
 DAY=27
 
 # -- Base URL for oss-cad-suite package
@@ -34,11 +34,11 @@ echo "Package version: $VERSION"
 
 # -- Version of the tool-system package
 # -- This tool is were the ftdi-eeprom program is stored
-TOOL_SYSTEM_VERSION=1.1.2
+TOOL_SYSTEM_VERSION=1.1.1
 
 # -- Target architectures
 ARCH=$1
-TARGET_ARCHS="linux_x86_64 windows_amd64 darwin"
+TARGET_ARCHS="linux_x86_64 linux_aarch64 windows_amd64 darwin"
 
 # -- Print the help message and exit
 function print_help_exit {
@@ -47,6 +47,7 @@ function print_help_exit {
   echo ""
   echo "ARCHITECTURES: "
   echo "  * linux_x86_64  : Linux 64-bits"
+  echo "  * linux_aarch64 : Linux ARM 64 bits"
   echo "  * windows_amd64 : Windows 64-bits"
   echo "  * darwin        : MAC"
   echo ""
@@ -127,6 +128,7 @@ echo ""
 # --  Apio package architecture    oss-cad-suite architecture
 # --  -------------------------    --------------------------
 # --     linux_x86_64               linux-x64
+# --     linux_aarch64              linux-arm64
 # --     windows_amd64              windows-x64
 # --     darwin                     darwin-x64
 
@@ -136,6 +138,11 @@ echo ""
 
 if [ "${ARCH}" == "linux_x86_64" ]; then
    ARCH_SRC="linux-x64"
+   EXT_SRC="tgz"
+fi
+
+if [ "${ARCH}" == "linux_aarch64" ]; then
+   ARCH_SRC="linux-arm64"
    EXT_SRC="tgz"
 fi
 
@@ -312,6 +319,45 @@ if [ "$ARCH" == "linux_x86_64" ]; then
 
 
 fi
+
+# --- Files to copy for the Linux platforms
+if [ "$ARCH" == "linux_aarch64" ]; then
+
+  echo "* Copying Linux files..."
+  echo ""
+  # --------------------
+  # -- System tools
+  # --------------------
+
+  # -- Executables
+  install $SOURCE_DIR/bin/lsusb $PACKAGE_DIR/bin
+  install $SOURCE_DIR/bin/lsftdi $PACKAGE_DIR/bin
+  install $SOURCE_DIR/libexec/lsusb $PACKAGE_DIR/libexec
+  install $SOURCE_DIR/libexec/lsftdi $PACKAGE_DIR/libexec
+
+  # -- Copy the ftdi_eeprom file
+  install $TOOL_SYSTEM_SRC/bin/ftdi_eeprom $PACKAGE_DIR/bin
+
+  # -- Libraries
+  install $SOURCE_DIR/lib/ld-linux-aarch64.so* $PACKAGE_DIR/lib
+  install $SOURCE_DIR/lib/libc.so* $PACKAGE_DIR/lib
+  install $SOURCE_DIR/lib/libudev.so* $PACKAGE_DIR/lib
+  install $SOURCE_DIR/lib/libpthread.so* $PACKAGE_DIR/lib
+  install $SOURCE_DIR/lib/librt.so* $PACKAGE_DIR/lib
+  install $SOURCE_DIR/lib/libusb-1.0.so* $PACKAGE_DIR/lib
+  install $SOURCE_DIR/lib/libftdi1.so* $PACKAGE_DIR/lib
+  
+
+  # ---------------------------
+  # -- Iceprog
+  # ---------------------------
+  # -- Executable
+  install $SOURCE_DIR/bin/iceprog $PACKAGE_DIR/bin
+  install $SOURCE_DIR/libexec/iceprog $PACKAGE_DIR/libexec
+
+
+fi
+
 
 # --- Files to copy for the MAC platforms
 if [ "$ARCH" == "darwin" ]; then
